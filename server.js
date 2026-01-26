@@ -1,3 +1,9 @@
+require("dotenv").config({ path: "./.env" });
+console.log("🔥 ENV CHECK:", {
+  cloud: process.env.CLOUDINARY_CLOUD_NAME,
+  key: process.env.CLOUDINARY_API_KEY,
+});
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
