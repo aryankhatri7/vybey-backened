@@ -36,12 +36,24 @@ router.post("/add", upload.single("image"), async (req, res) => {
 });
 
 
-// ✅ GET PRODUCTS
+// ✅ GET PRODUCTS (with optional bestSeller filter)
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+
+    let query = {};
+
+    if (req.query.bestSeller === "true") {
+      query.bestSeller = true;
+    }
+
+    const products = await Product
+      .find(query)
+      .sort({ createdAt: -1 });
+
     res.json(products);
+
   } catch (err) {
+    console.error("GET PRODUCTS ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });

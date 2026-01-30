@@ -18,6 +18,11 @@ const productSchema = new mongoose.Schema({
     required: true,
     trim: true
   }
+  bestSeller: {
+  type: Boolean,
+  default: false
+}
+
 }, {
   timestamps: true
 });
