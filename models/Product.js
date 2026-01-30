@@ -8,20 +8,23 @@ const productSchema = new mongoose.Schema({
     minlength: 2,
     maxlength: 120
   },
+
   price: {
     type: Number,
     required: true,
     min: 0
   },
+
   image: {
     type: String,
     required: true,
     trim: true
-  }
+  },   // ✅ comma needed here
+
   bestSeller: {
-  type: Boolean,
-  default: false
-}
+    type: Boolean,
+    default: false
+  }
 
 }, {
   timestamps: true
