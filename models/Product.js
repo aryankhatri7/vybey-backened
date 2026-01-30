@@ -19,18 +19,17 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true
-  },   
+  },
+
+  trending: {
+    type: Boolean,
+    default: false
+  },
 
   bestSeller: {
     type: Boolean,
     default: false
   }
-
- 
-  trending: {
-    type: Boolean,
-    default: false
-  } 
 
 }, {
   timestamps: true
