@@ -3,20 +3,23 @@ const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
+    trim: true,
+    minlength: 2,
+    maxlength: 120
   },
   price: {
     type: Number,
-    required: true
+    required: true,
+    min: 0
   },
   image: {
     type: String,
-    required: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
+    required: true,
+    trim: true
   }
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model("Product", productSchema);

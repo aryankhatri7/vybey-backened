@@ -1,27 +1,23 @@
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
-// User Schema
-const userSchema = new mongoose.Schema({
-  name: String,
-  email: { type: String, unique: true },
-  password: String,
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+const User = require("../models/User");
 
-const User = mongoose.model("User", userSchema);
 
 // ===================== SIGNUP =====================
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    let { name, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields required" });
+    }
+
+    email = email.toLowerCase().trim();
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 chars" });
     }
 
     const existingUser = await User.findOne({ email });
@@ -29,31 +25,43 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const user = new User({ name, email, password });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword
+    });
+
     await user.save();
 
     res.json({ message: "Signup successful" });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+
 // ===================== LOGIN =====================
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: "Email & password required" });
     }
 
-    const user = await User.findOne({ email });
+    email = email.toLowerCase().trim();
 
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
 
-    if (user.password !== password) {
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
       return res.status(400).json({ message: "Invalid password" });
     }
 
@@ -65,6 +73,7 @@ router.post("/login", async (req, res) => {
         email: user.email
       }
     });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
