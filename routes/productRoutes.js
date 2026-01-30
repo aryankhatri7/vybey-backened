@@ -2,12 +2,12 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const Product = require("../models/Product");
-const upload = require("../multer"); // ✅ Cloudinary multer
+const upload = require("../multer");
 
 // ✅ ADD PRODUCT (ADMIN)
 router.post("/add", upload.single("image"), async (req, res) => {
   try {
-    const { name, price } = req.body;
+    const { name, price, trending, bestSeller } = req.body;
 
     if (!name || !price) {
       return res.status(400).json({ message: "Name and price required" });
@@ -25,6 +25,8 @@ router.post("/add", upload.single("image"), async (req, res) => {
       name,
       price,
       image: req.file.path,
+      trending: trending === "true",
+      bestSeller: bestSeller === "true"
     });
 
     await product.save();
@@ -36,20 +38,20 @@ router.post("/add", upload.single("image"), async (req, res) => {
 });
 
 
-// ✅ GET PRODUCTS (with optional bestSeller filter)
+// ✅ GET PRODUCTS (FILTER SUPPORT)
 router.get("/", async (req, res) => {
   try {
+    let filter = {};
 
-    let query = {};
-
-    if (req.query.bestSeller === "true") {
-      query.bestSeller = true;
+    if (req.query.trending === "true") {
+      filter.trending = true;
     }
 
-    const products = await Product
-      .find(query)
-      .sort({ createdAt: -1 });
+    if (req.query.bestSeller === "true") {
+      filter.bestSeller = true;
+    }
 
+    const products = await Product.find(filter).sort({ createdAt: -1 });
     res.json(products);
 
   } catch (err) {
@@ -59,10 +61,9 @@ router.get("/", async (req, res) => {
 });
 
 
-// ✅ DELETE PRODUCT (DB only)
+// ✅ DELETE PRODUCT
 router.delete("/:id", async (req, res) => {
   try {
-
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: "Invalid product id" });
     }
@@ -74,6 +75,5 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 module.exports = router;
